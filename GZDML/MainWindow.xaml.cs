@@ -265,7 +265,7 @@ namespace GZDML
 
         private void ProfilesLoadButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ProfilesComboBox.SelectedItem != null)
+            if (ProfilesComboBox.SelectedItem != null || !string.IsNullOrWhiteSpace(ProfilesComboBox.Text))
             {
                 LoadData($"GZDML_profile_{ProfilesComboBox.Text}.json");
                 ExecutableTextBox.Text = doomPath;
