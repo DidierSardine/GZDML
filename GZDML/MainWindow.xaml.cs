@@ -23,18 +23,19 @@ namespace GZDML
         public string additionalArgs { get; set; }
         public ObservableCollection<ModItem> modItems { get; set; } = new ObservableCollection<ModItem>();
         public ObservableCollection<string> profileItems = new ObservableCollection<string>();
+        public static string profilesPath = "GZDML-profiles";
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            if (!System.IO.Directory.Exists("GZDML-profiles"))
+            if (!System.IO.Directory.Exists(profilesPath))
             {
-                System.IO.Directory.CreateDirectory("GZDML-profiles");
+                System.IO.Directory.CreateDirectory(profilesPath);
             }
-            if (System.IO.File.Exists("GZDML-profiles\\GZDML_profile_default.json"))
+            if (System.IO.File.Exists(profilesPath + "\\GZDML_profile_default.json"))
             {
-                string jsonString = System.IO.File.ReadAllText("GZDML-profiles\\GZDML_profile_default.json");
+                string jsonString = System.IO.File.ReadAllText(profilesPath + "\\GZDML_profile_default.json");
                 ModManagerData mmdata = JsonSerializer.Deserialize<ModManagerData>(jsonString);
                 if (mmdata.DoomPath != null) doomPath = mmdata.DoomPath;
                 if (mmdata.IWadPath != null) iWadPath = mmdata.IWadPath;
@@ -162,17 +163,17 @@ namespace GZDML
         public void SaveData(ModManagerData data, string filepath)
         {
             string jsonString = JsonSerializer.Serialize(data);
-            System.IO.File.WriteAllText("GZDML-profiles\\" + filepath, jsonString);
+            System.IO.File.WriteAllText(profilesPath + "\\" + filepath, jsonString);
         }
 
         public void LoadData(string filePath)
         {
-            if (!System.IO.File.Exists("GZDML-profiles\\" + filePath))
+            if (!System.IO.File.Exists(profilesPath + "\\" + filePath))
             {
                 MessageBox.Show("Profile not found: " + filePath, "GZDML Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            string jsonString = System.IO.File.ReadAllText("GZDML-profiles\\" + filePath);
+            string jsonString = System.IO.File.ReadAllText(profilesPath + "\\" + filePath);
             ModManagerData mmdata = JsonSerializer.Deserialize<ModManagerData>(jsonString);
             if (mmdata.DoomPath != null) doomPath = mmdata.DoomPath;
             if (mmdata.IWadPath != null) iWadPath = mmdata.IWadPath;
@@ -189,8 +190,7 @@ namespace GZDML
 
         private void RefreshProfiles()
         {
-            string profilesDirectory = "GZDML-profiles\\";
-            var profileFiles = System.IO.Directory.GetFiles(profilesDirectory, "GZDML_profile_*.json");
+            var profileFiles = System.IO.Directory.GetFiles(profilesPath + "\\", "GZDML_profile_*.json");
             profileItems.Clear();
             foreach (var profileFile in profileFiles)
             {
@@ -286,9 +286,9 @@ namespace GZDML
                 MessageBox.Show("Please select a profile.", "GZDML Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (System.IO.File.Exists("GZDML-profiles\\GZDML_profile_" + ProfilesComboBox.Text + ".json"))
+            if (System.IO.File.Exists(profilesPath + "\\GZDML_profile_" + ProfilesComboBox.Text + ".json"))
             {
-                System.IO.File.Delete("GZDML-profiles\\GZDML_profile_" + ProfilesComboBox.Text + ".json");
+                System.IO.File.Delete(profilesPath + "\\GZDML_profile_" + ProfilesComboBox.Text + ".json");
                 MessageBox.Show("Profile deleted: " + ProfilesComboBox.Text, "GZDML Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 RefreshProfiles();
             }
