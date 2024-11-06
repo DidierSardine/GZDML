@@ -160,18 +160,27 @@ namespace GZDML
             }
         }
 
-        public void SaveData(ModManagerData data, string filepath)
+        public bool SaveData(ModManagerData data, string filepath)
         {
             string jsonString = JsonSerializer.Serialize(data);
-            System.IO.File.WriteAllText(profilesPath + "\\" + filepath, jsonString);
+            try
+            {
+                System.IO.File.WriteAllText(profilesPath + "\\" + filepath, jsonString);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving profile: " + ex.Message, "GZDML Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
         }
 
-        public void LoadData(string filePath)
+        public bool LoadData(string filePath)
         {
             if (!System.IO.File.Exists(profilesPath + "\\" + filePath))
             {
                 MessageBox.Show("Profile not found: " + filePath, "GZDML Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
             string jsonString = System.IO.File.ReadAllText(profilesPath + "\\" + filePath);
             ModManagerData mmdata = JsonSerializer.Deserialize<ModManagerData>(jsonString);
@@ -186,6 +195,7 @@ namespace GZDML
                     modItems.Add(mod);
                 }
             }
+            return true;
         }
 
         private void RefreshProfiles()
@@ -253,7 +263,8 @@ namespace GZDML
         {
             if (ProfilesComboBox.SelectedItem != null || !string.IsNullOrWhiteSpace(ProfilesComboBox.Text))
             {
-                SaveData(new ModManagerData { DoomPath = ExecutableTextBox.Text, IWadPath = IWADTextBox.Text, AdditionalArgs = additionalArgs, ModItems = modItems }, $"GZDML_profile_{ProfilesComboBox.Text}.json");
+                bool success = SaveData(new ModManagerData { DoomPath = ExecutableTextBox.Text, IWadPath = IWADTextBox.Text, AdditionalArgs = additionalArgs, ModItems = modItems }, $"GZDML_profile_{ProfilesComboBox.Text}.json");
+                if (!success) return;
                 MessageBox.Show("Profile saved: " + ProfilesComboBox.Text, "GZDML Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 RefreshProfiles();
             } 
@@ -267,7 +278,8 @@ namespace GZDML
         {
             if (ProfilesComboBox.SelectedItem != null || !string.IsNullOrWhiteSpace(ProfilesComboBox.Text))
             {
-                LoadData($"GZDML_profile_{ProfilesComboBox.Text}.json");
+                bool success = LoadData($"GZDML_profile_{ProfilesComboBox.Text}.json");
+                if (!success) return;
                 ExecutableTextBox.Text = doomPath;
                 IWADTextBox.Text = iWadPath;
                 ArgsTextBox.Text = additionalArgs;
@@ -281,7 +293,7 @@ namespace GZDML
 
         private void ProfilesDeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ProfilesComboBox.SelectedItem == null)
+            if (ProfilesComboBox.SelectedItem == null && string.IsNullOrWhiteSpace(ProfilesComboBox.Text))
             {
                 MessageBox.Show("Please select a profile.", "GZDML Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
